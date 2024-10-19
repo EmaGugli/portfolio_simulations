@@ -1,20 +1,26 @@
 from datetime import datetime
+import yfinance as yf
 
 class TimeSeries:
-    def __init__(self, asset_name: str, values: list[float], time: list[datetime]):
-        """
-        Initialize the TimeSeries object.
-
-        :param asset_name: The name of the asset (e.g., ticker symbol).
-        :param values: A list of float values representing the asset's value at each time point.
-        :param time: A list of datetime objects representing the time for each value.
-        """
-        if len(values) != len(time):
-            raise ValueError("The length of values and time must be the same.")
-        
+    def __init__(self,
+        asset_name: str,
+        values: list[float] = None,
+        dates: list[datetime] = None
+        ):
         self.asset_name = asset_name
-        self.values = values
-        self.time = time
+        if values is not None and dates is not None:
+            if len(values) != len(dates):
+                raise ValueError("The length of values and dates must be the same.")
+            self.values = values
+            self.dates = dates
+        elif values is not None or dates is not None:
+            raise ValueError("Both values and dates must be passed to the constructor.")
+        else:
+            try:
+                ticker = yf.Ticker(asset_name)
+                self.historical_data = ticker.history(period="max")
+            except Exception:
+                raise ValueError("The ticker passed is not valid. Please pass a valid ticker or values and dates.")
 
     def get_returns(self) -> list[float]:
         """
