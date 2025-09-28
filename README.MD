@@ -1,0 +1,175 @@
+# Portfolio Simulations
+
+A Python package for simulating portfolio returns and analyzing investment strategies using Monte Carlo methods.
+
+## Features
+
+- **Asset Management**: Create and manage individual assets with historical data from Yahoo Finance
+- **Portfolio Construction**: Build portfolios with custom asset weights
+- **Monte Carlo Simulation**: Run thousands of simulations to analyze portfolio performance
+- **Statistical Analysis**: Calculate mean returns, variance, and Sharpe ratios
+- **Visualization**: Plot return distributions and portfolio performance
+- **Command Line Interface**: Easy-to-use CLI for quick analysis
+
+## Installation
+
+### From Source
+
+```bash
+git clone https://github.com/EmaGugli/portfolio_simulations.git
+cd portfolio_simulations
+pip install -e .
+```
+
+### Development Installation
+
+```bash
+git clone https://github.com/EmaGugli/portfolio_simulations.git
+cd portfolio_simulations
+pip install -e ".[dev]"
+```
+
+## Quick Start
+
+### Python API
+
+```python
+from portfolio_simulations import Portfolio, Asset
+from datetime import datetime
+
+# Create a portfolio
+portfolio = Portfolio()
+
+# Add assets with weights
+portfolio.add_asset("AAPL", 0.4)  # 40% Apple
+portfolio.add_asset("GOOGL", 0.3)  # 30% Google
+portfolio.add_asset("MSFT", 0.3)   # 30% Microsoft
+
+# Set analysis period
+portfolio.add_start_date(datetime(2020, 1, 1))
+portfolio.add_end_date(datetime(2023, 12, 31))
+
+# Run Monte Carlo simulation
+portfolio.compute_return_distribution(
+    rolling_window=5,  # 5-year rolling window
+    num_simulations=1000  # 1000 simulations
+)
+
+# View results
+portfolio.print_portfolio()
+portfolio.plot_return_distributions()
+```
+
+### Command Line Interface
+
+```bash
+# Basic usage
+portfolio-simulation --assets AAPL GOOGL MSFT --weights 0.4 0.3 0.3
+
+# With date range and custom parameters
+portfolio-simulation \
+    --assets AAPL GOOGL MSFT \
+    --weights 0.4 0.3 0.3 \
+    --start-date 2020-01-01 \
+    --end-date 2023-12-31 \
+    --simulations 5000 \
+    --rolling-window 3 \
+    --plot
+```
+
+## API Reference
+
+### Asset Class
+
+The `Asset` class represents a single financial asset with historical price data.
+
+```python
+from portfolio_simulations import Asset
+
+# Create asset from Yahoo Finance ticker
+asset = Asset("AAPL", weight=0.5)
+
+# Or create with custom data
+asset = Asset("Custom", weight=0.5, values=[100, 105, 110], dates=[...])
+```
+
+**Methods:**
+- `set_window(start_date, end_date)`: Filter data to specific date range
+- `get_returns()`: Calculate annualized returns
+
+### Portfolio Class
+
+The `Portfolio` class manages multiple assets and runs simulations.
+
+```python
+from portfolio_simulations import Portfolio
+
+portfolio = Portfolio()
+```
+
+**Methods:**
+- `add_asset(name, weight, values=None, dates=None)`: Add asset to portfolio
+- `add_start_date(date)`: Set analysis start date
+- `add_end_date(date)`: Set analysis end date
+- `compute_return_distribution(rolling_window, num_simulations)`: Run Monte Carlo simulation
+- `plot_return_distributions()`: Visualize results
+- `print_portfolio()`: Display portfolio summary
+
+### Utility Functions
+
+```python
+from portfolio_simulations import calculate_portfolio_statistics
+
+stats = calculate_portfolio_statistics(
+    assets=portfolio.assets,
+    start_date=datetime(2020, 1, 1),
+    end_date=datetime(2023, 12, 31),
+    num_simulations=1000
+)
+```
+
+## Requirements
+
+- Python 3.8+
+- numpy >= 1.21.0
+- matplotlib >= 3.5.0
+- yfinance >= 0.2.0
+- pandas >= 1.3.0
+
+## Development
+
+### Running Tests
+
+```bash
+pytest
+```
+
+### Code Formatting
+
+```bash
+black portfolio_simulations/
+```
+
+### Type Checking
+
+```bash
+mypy portfolio_simulations/
+```
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## Author
+
+**Emanuele Gugliandolo**
+- Email: emanuelegugliandolo@gmail.com
+- GitHub: [@EmaGugli](https://github.com/EmaGugli)

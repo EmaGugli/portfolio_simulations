@@ -1,0 +1,74 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "portfolio-simulations"
+version = "0.0.0"
+description = "Simulation of portfolio returns"
+readme = "README.MD"
+requires-python = ">=3.8"
+license = {text = "MIT"}
+authors = [
+    {name = "Emanuele Gugliandolo", email = "emanuelegugliandolo@gmail.com"}
+]
+keywords = ["portfolio", "simulations", "finance", "monte-carlo"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Office/Business :: Financial :: Investment",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
+dependencies = [
+    "numpy>=1.21.0",
+    "matplotlib>=3.5.0",
+    "yfinance>=0.2.0",
+    "pandas>=1.3.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+    "black>=22.0",
+    "flake8>=4.0",
+    "mypy>=0.900",
+]
+test = [
+    "pytest>=6.0",
+    "pytest-cov>=2.0",
+]
+
+[project.scripts]
+portfolio-simulation = "portfolio_simulations.cli:main"
+
+[project.urls]
+Homepage = "https://github.com/EmaGugli/portfolio_simulations"
+Repository = "https://github.com/EmaGugli/portfolio_simulations"
+Issues = "https://github.com/EmaGugli/portfolio_simulations/issues"
+
+[tool.setuptools.packages.find]
+exclude = ["tests*", "docs*"]
+
+[tool.black]
+line-length = 88
+target-version = ['py38']
+
+[tool.mypy]
+python_version = "3.8"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]

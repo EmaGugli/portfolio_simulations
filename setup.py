@@ -4,7 +4,7 @@ setup(
     name='portfolio_simulations',
     version='0.0.0',
     description='Simulation of portfolio returns',
-    long_description=open('README.md').read(),
+    long_description=open('README.MD').read(),
     url='https://github.com/EmaGugli/portfolio_simulations',
     author='Emanuele Gugliandolo',
     author_email='emanuelegugliandolo@gmail.com',
@@ -19,9 +19,10 @@ setup(
     keywords='portfolio simulations',
     packages=find_packages(exclude=['contrib', 'docs', 'tests']),
     install_requires=[
-        'numpy',
-        'matplotlib',
-        'yfinance',
+        'numpy>=1.21.0',
+        'matplotlib>=3.5.0',
+        'yfinance>=0.2.0',
+        'pandas>=1.3.0',
     ],
     extras_require={
         'dev': [
@@ -32,7 +33,7 @@ setup(
         ],
     },
     package_data={
-        '': ['README.md', 'LICENSE'],
+        '': ['README.MD', 'LICENSE'],
     },
     entry_points={
         'console_scripts': [

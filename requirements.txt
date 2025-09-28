@@ -1,5 +1,0 @@
-matplotlib==3.9.2
-numpy==2.1.2
-yfinance==0.2.44
-seaborn==0.13.2
-setuptools==75.2.0

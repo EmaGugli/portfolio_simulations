@@ -1,62 +1,120 @@
+#TODO Add methods to remove assets and modify weights
+#TODO Make updating shared time window not destructive
 from datetime import datetime
-from time_series import TimeSeries
-from utils import calculate_portfolio_statistics
+from portfolio_simulations.asset import Asset
 import matplotlib.pyplot as plt
+import pandas as pd
+import random
 
 class Portfolio:
-    def __init__(self, 
-        time_series_list: list[TimeSeries],
-        start_date: datetime,
-        end_date: datetime
-        ):
-        self.time_series_list = time_series_list
+    def __init__(self):
+        self.assets = []
+
+    def add_asset(self, 
+        asset_name: str,
+        weight: float,
+        values: list[float] = None,
+        dates: list[datetime] = None
+    ) -> None:
+        """
+        Add a new asset to the portfolio. If value and dates are not passed, the asset will be fetched from yfinance.
+        """
+        asset = Asset(asset_name, weight=weight, values=values, dates=dates)
+        self.assets.append(asset)
+        self._update_shared_time_window()
+
+    def add_start_date(self, start_date: datetime):
+        """
+        Add the start date to the portfolio.
+        """
         self.start_date = start_date
+        self._update_shared_time_window()
+
+    def add_end_date(self, end_date: datetime):
+        """
+        Add the end date to the portfolio.
+        """
         self.end_date = end_date
+        self._update_shared_time_window()
 
-    def add_time_series(self, time_series: TimeSeries):
-        """
-        Add a new TimeSeries to the portfolio.
+    def compute_return_distribution(self,
+        rolling_window: int = 5,
+        num_simulations: int = 1000,
+    ):
+        date_upper_limit = max(self.combined_window["Date"]-pd.DateOffset(years=rolling_window))
+        available_dates = self.combined_window[self.combined_window["Date"] <= date_upper_limit]
+        
+        for asset in self.assets:
+            asset.set_window(self.start_date, self.end_date)
 
-        :param time_series: A TimeSeries object representing a new asset to add.
-        """
-        self.time_series_list.append(time_series)
+        self.portfolio_returns = []
+        for i in range(num_simulations):
+            if available_dates.empty:
+                raise ValueError("Not enough data to generate return distribution, reduce rolling_window or num_simulations.")
+            simulation_start_date = random.choice(available_dates)
+            simulation_end_date = simulation_start_date + pd.DateOffset(years=rolling_window)
+        
+            available_dates = available_dates[available_dates != simulation_start_date]
 
-    def compute_statistics(self) -> dict:
-        """
-        Compute portfolio statistics such as mean return, variance, and Sharpe ratio.
+            self.portfolio_returns.append(self.compute_portfolio_returns(simulation_start_date, simulation_end_date))
 
-        :return: A dictionary containing portfolio statistics.
+    def _update_shared_time_window(self):
+        combined_dates = set()
+        earliest_date = 0
+        latest_date = 0
+        for asset in self.assets:
+            combined_dates.update(asset.historical_data['Date'])
+            earliest_date = min(earliest_date, asset.historical_data['Date'].min())
+            latest_date = max(latest_date, asset.historical_data['Date'].max())
+        combined_dates = sorted(combined_dates)
+        if self.start_date and self.start_date < earliest_date:
+            self.start_date = earliest_date
+        if self.end_date and self.end_date > latest_date:
+            self.end_date = latest_date
+        
+        self.combined_window = pd.DataFrame({"Date": combined_dates})
+    
+    def compute_portfolio_returns(self, start_date: datetime, end_date: datetime):
         """
-        return calculate_portfolio_statistics(self.time_series_list)
-
-    def run_simulation(self, num_simulations: int = 1000):
+        Compute the return distribution of the portfolio between two dates.
         """
-        Simulate portfolio returns using Monte Carlo simulations or other methods.
-
-        :param num_simulations: The number of simulations to run.
-        """
-        # Placeholder for simulation logic
-        simulated_results = []
-        for _ in range(num_simulations):
-            # Simulate returns and add to the list
-            pass
-        return simulated_results
+        for asset in self.assets:
+            asset.set_window(start_date, end_date)
+            asset.returns = asset.get_returns()
+        
+        portfolio_returns = sum([asset.weight * asset.returns for asset in self.assets])
+        return portfolio_returns
 
     def plot_return_distributions(self):
         """
         Plot the return distributions of the portfolio.
-
-        :return: A matplotlib plot showing the return distributions.
         """
-        all_returns = []
-        for ts in self.time_series_list:
-            all_returns += ts.get_returns()
-        
-        plt.hist(all_returns, bins=50)
+        plt.hist(self.portfolio_returns)
         plt.title("Portfolio Return Distributions")
         plt.xlabel("Returns")
         plt.ylabel("Frequency")
         plt.show()
 
-    def __repr__(self):
-        return f"Portfolio({len(self.time_series_list)} assets, from {self.start_date} to {self.end_date})"
+    def print_portfolio(self):
+        """
+        Print the portfolio.
+        """	
+        print(f"Start date: {self.start_date}")
+        print(f"End date: {self.end_date}")
+        for asset in self.assets:
+            print(f"{asset.asset_name}: {asset.weight}")
+
+    def remove_asset(self, asset_name: str):
+        """
+        Remove an asset from the portfolio.
+        """
+        self.assets = [asset for asset in self.assets if asset.asset_name != asset_name]
+        self._update_shared_time_window()
+
+if __name__ == "__main__":
+    portfolio = Portfolio()
+    portfolio.add_asset("VWCE.DE", 0.8)
+    portfolio.add_asset("ZPRX.DE", 0.1)
+    portfolio.add_asset("ZPRV.DE", 0.1)
+    portfolio.compute_return_distribution()
+    portfolio.plot_return_distributions()

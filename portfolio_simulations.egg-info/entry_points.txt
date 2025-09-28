@@ -1,0 +1,2 @@
+[console_scripts]
+portfolio-simulation = portfolio_simulations.cli:main
